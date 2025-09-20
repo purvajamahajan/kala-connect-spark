@@ -137,11 +137,11 @@ All colors MUST be HSL for cultural warmth and accessibility.
 
   .text-heritage {
     font-family: 'Crimson Text', 'Noto Sans Devanagari', serif;
-    @apply text-lg text-muted-foreground leading-relaxed;
+    @apply text-lg text-foreground leading-relaxed;
   }
 
   .text-bilingual {
-    @apply text-sm text-muted-foreground;
+    @apply text-sm text-foreground/80;
   }
 
   /* Cultural Patterns */

@@ -4,6 +4,8 @@ import { CulturalButton } from "@/components/ui/cultural-button";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Gift, Star, Calendar } from "lucide-react";
 import diwaliElements from "@/assets/diwali-elements.jpg";
+import holiElements from "@/assets/holi-elements.jpg";
+import ganeshElements from "@/assets/ganesh-elements.jpg";
 
 const festivals = [
   {
@@ -104,7 +106,7 @@ export function FestivalMode({ isActive, onToggle }: FestivalModeProps) {
           </CulturalButton>
         </div>
         {isActive && (
-          <p className="text-heritage animate-cultural-fade">
+          <p className="text-foreground animate-cultural-fade font-medium">
             🎉 Experience MegaMosaic in festive colors! Festival-ready products are highlighted.
           </p>
         )}
@@ -134,6 +136,18 @@ export function FestivalMode({ isActive, onToggle }: FestivalModeProps) {
               <div
                 className="absolute inset-0 bg-cover bg-center opacity-20"
                 style={{ backgroundImage: `url(${diwaliElements})` }}
+              />
+            )}
+            {selectedFestival === "holi" && (
+              <div
+                className="absolute inset-0 bg-cover bg-center opacity-20"
+                style={{ backgroundImage: `url(${holiElements})` }}
+              />
+            )}
+            {selectedFestival === "ganeshotsav" && (
+              <div
+                className="absolute inset-0 bg-cover bg-center opacity-20"
+                style={{ backgroundImage: `url(${ganeshElements})` }}
               />
             )}
             <div className="relative z-10">
@@ -201,12 +215,21 @@ export function FestivalMode({ isActive, onToggle }: FestivalModeProps) {
               <Gift className="w-6 h-6 text-primary" />
               Festival-Ready Collection
             </h3>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {festivalProducts[selectedFestival as keyof typeof festivalProducts].map((product, index) => (
                 <CulturalCard key={index} variant="artisan" className="animate-cultural-fade hover:shadow-festival transition-all">
                   <CulturalCardContent className="p-4">
-                    <div className="aspect-square bg-heritage rounded-lg mb-3 flex items-center justify-center">
-                      <Gift className="w-8 h-8 text-primary animate-float" />
+                    <div className="aspect-square bg-heritage rounded-lg mb-3 flex items-center justify-center relative overflow-hidden">
+                      {selectedFestival === "diwali" && (
+                        <img src={diwaliElements} alt="Diwali elements" className="absolute inset-0 w-full h-full object-cover opacity-30" />
+                      )}
+                      {selectedFestival === "holi" && (
+                        <img src={holiElements} alt="Holi elements" className="absolute inset-0 w-full h-full object-cover opacity-30" />
+                      )}
+                      {selectedFestival === "ganeshotsav" && (
+                        <img src={ganeshElements} alt="Ganesh elements" className="absolute inset-0 w-full h-full object-cover opacity-30" />
+                      )}
+                      <Gift className="w-8 h-8 text-primary animate-float relative z-10" />
                     </div>
                     <h5 className="font-semibold text-sm mb-2">{product.name}</h5>
                     <p className="text-xs text-muted-foreground mb-1">
