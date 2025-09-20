@@ -2,97 +2,122 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* MegaMosaic Design System - Celebrating India's Traditional Arts
+All colors MUST be HSL for cultural warmth and accessibility.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Cultural Background Colors */
+    --background: 35 25% 97%; /* Warm parchment */
+    --foreground: 25 30% 15%; /* Deep earth brown */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Cultural Card System */
+    --card: 42 40% 95%; /* Cream canvas */
+    --card-foreground: 25 30% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 42 40% 95%;
+    --popover-foreground: 25 30% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Terracotta Heritage */
+    --primary: 15 75% 45%; /* Rich terracotta */
+    --primary-foreground: 42 40% 95%;
+    --primary-glow: 15 85% 55%; /* Lighter terracotta */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Saffron Tradition */
+    --secondary: 35 100% 60%; /* Saffron */
+    --secondary-foreground: 25 30% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted - Jute Texture */
+    --muted: 35 20% 85%; /* Soft jute */
+    --muted-foreground: 25 25% 35%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Gold Heritage */
+    --accent: 45 100% 50%; /* Traditional gold */
+    --accent-foreground: 25 30% 15%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Cultural Surfaces */
+    --heritage: 25 40% 90%; /* Heritage surface */
+    --heritage-foreground: 25 30% 15%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 42 40% 95%;
 
-    --radius: 0.5rem;
+    --border: 35 15% 80%; /* Subtle earth border */
+    --input: 35 15% 80%;
+    --ring: 15 75% 45%; /* Terracotta focus ring */
 
-    --sidebar-background: 0 0% 98%;
+    --radius: 0.75rem; /* Rounded like traditional pottery */
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Cultural Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-saffron: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--accent)));
+    --gradient-heritage: linear-gradient(180deg, hsl(var(--heritage)), hsl(var(--background)));
+    --gradient-cultural: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--accent)));
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Cultural Shadows */
+    --shadow-cultural: 0 10px 30px -10px hsl(var(--primary) / 0.3);
+    --shadow-heritage: 0 5px 20px -5px hsl(var(--muted-foreground) / 0.2);
+    --shadow-festival: 0 0 40px hsl(var(--accent) / 0.4);
 
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar - Cultural Navigation */
+    --sidebar-background: 35 25% 95%;
+    --sidebar-foreground: 25 30% 15%;
+    --sidebar-primary: 15 75% 45%;
+    --sidebar-primary-foreground: 42 40% 95%;
+    --sidebar-accent: 35 20% 85%;
+    --sidebar-accent-foreground: 25 30% 15%;
+    --sidebar-border: 35 15% 80%;
+    --sidebar-ring: 15 75% 45%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Evening Cultural Mode */
+    --background: 25 20% 8%; /* Deep earth night */
+    --foreground: 42 40% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 25 25% 12%; /* Dark clay */
+    --card-foreground: 42 40% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 25 25% 12%;
+    --popover-foreground: 42 40% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 15 85% 55%; /* Glowing terracotta */
+    --primary-foreground: 25 20% 8%;
+    --primary-glow: 15 95% 65%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 35 100% 70%; /* Bright saffron */
+    --secondary-foreground: 25 20% 8%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 25 15% 18%; /* Dark jute */
+    --muted-foreground: 35 20% 70%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 45 100% 60%; /* Bright gold */
+    --accent-foreground: 25 20% 8%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --heritage: 25 20% 15%;
+    --heritage-foreground: 42 40% 95%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 42 40% 95%;
+
+    --border: 25 15% 20%;
+    --input: 25 15% 20%;
+    --ring: 15 85% 55%;
+
+    --sidebar-background: 25 20% 10%;
+    --sidebar-foreground: 42 40% 95%;
+    --sidebar-primary: 15 85% 55%;
+    --sidebar-primary-foreground: 25 20% 8%;
+    --sidebar-accent: 25 15% 18%;
+    --sidebar-accent-foreground: 42 40% 95%;
+    --sidebar-border: 25 15% 20%;
+    --sidebar-ring: 15 85% 55%;
   }
 }
+
+/* Cultural Typography */
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&family=Noto+Sans+Devanagari:wght@300;400;500;600&display=swap');
 
 @layer base {
   * {
@@ -101,5 +126,80 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+  }
+
+  /* Cultural Text Styles */
+  .text-cultural-heading {
+    font-family: 'Crimson Text', 'Noto Sans Devanagari', serif;
+    @apply text-2xl md:text-3xl font-semibold text-foreground;
+  }
+
+  .text-heritage {
+    font-family: 'Crimson Text', 'Noto Sans Devanagari', serif;
+    @apply text-lg text-muted-foreground leading-relaxed;
+  }
+
+  .text-bilingual {
+    @apply text-sm text-muted-foreground;
+  }
+
+  /* Cultural Patterns */
+  .pattern-heritage {
+    background-image: radial-gradient(circle at 1px 1px, hsl(var(--muted-foreground) / 0.15) 1px, transparent 0);
+    background-size: 20px 20px;
+  }
+
+  .pattern-tribal {
+    background-image: 
+      linear-gradient(45deg, hsl(var(--muted-foreground) / 0.1) 25%, transparent 25%),
+      linear-gradient(-45deg, hsl(var(--muted-foreground) / 0.1) 25%, transparent 25%);
+    background-size: 40px 40px;
+  }
+}
+
+/* Cultural Animations */
+@layer utilities {
+  .animate-cultural-fade {
+    animation: cultural-fade 0.8s ease-out forwards;
+  }
+
+  .animate-heritage-glow {
+    animation: heritage-glow 2s ease-in-out infinite alternate;
+  }
+
+  .animate-festival-pulse {
+    animation: festival-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes cultural-fade {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes heritage-glow {
+    from {
+      box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+    }
+    to {
+      box-shadow: 0 0 40px hsl(var(--primary) / 0.6);
+    }
+  }
+
+  @keyframes festival-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 0.8;
+    }
   }
 }
