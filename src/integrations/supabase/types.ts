@@ -14,7 +14,173 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      artforms: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          cultural_significance: string | null
+          description: string | null
+          heritage_story: string | null
+          history: string | null
+          id: string
+          image_url: string | null
+          name: string
+          region: string | null
+          status: Database["public"]["Enums"]["artform_status"] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          cultural_significance?: string | null
+          description?: string | null
+          heritage_story?: string | null
+          history?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          region?: string | null
+          status?: Database["public"]["Enums"]["artform_status"] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          cultural_significance?: string | null
+          description?: string | null
+          heritage_story?: string | null
+          history?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          region?: string | null
+          status?: Database["public"]["Enums"]["artform_status"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artforms_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          artform_id: string
+          audio_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          images: string[] | null
+          is_featured: boolean | null
+          is_festival_special: boolean | null
+          price: number | null
+          seller_id: string
+          status: string | null
+          stock_quantity: number | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          artform_id: string
+          audio_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          is_featured?: boolean | null
+          is_festival_special?: boolean | null
+          price?: number | null
+          seller_id: string
+          status?: string | null
+          stock_quantity?: number | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          artform_id?: string
+          audio_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          is_featured?: boolean | null
+          is_festival_special?: boolean | null
+          price?: number | null
+          seller_id?: string
+          status?: string | null
+          stock_quantity?: number | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_artform_id_fkey"
+            columns: ["artform_id"]
+            isOneToOne: false
+            referencedRelation: "artforms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          id: string
+          languages: string[] | null
+          name: string
+          phone: string | null
+          region: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: string
+          languages?: string[] | null
+          name: string
+          phone?: string | null
+          region?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: string
+          languages?: string[] | null
+          name?: string
+          phone?: string | null
+          region?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +189,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      artform_status: "approved" | "pending" | "featured"
+      user_role: "customer" | "seller" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +317,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      artform_status: ["approved", "pending", "featured"],
+      user_role: ["customer", "seller", "admin"],
+    },
   },
 } as const

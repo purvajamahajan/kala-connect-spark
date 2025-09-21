@@ -1,274 +1,229 @@
-import { useState } from "react";
-import { WelcomeScreen } from "@/components/onboarding/WelcomeScreen";
-import { CulturalTimeline } from "@/components/cultural/CulturalTimeline";
-import { FestivalMode } from "@/components/festival/FestivalMode";
-import { CollaborationHub } from "@/components/collaboration/CollaborationHub";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { HomeScreen } from "@/components/home/HomeScreen";
+import { AuthScreen } from "@/components/auth/AuthScreen";
+import { SellerRegistration } from "@/components/seller/SellerRegistration";
+import { CustomerMarketplace } from "@/components/customer/CustomerMarketplace";
+import { ProductDetail } from "@/components/product/ProductDetail";
 import { CulturalButton } from "@/components/ui/cultural-button";
-import { CulturalCard, CulturalCardContent, CulturalCardDescription, CulturalCardHeader, CulturalCardTitle } from "@/components/ui/cultural-card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Home, 
-  Calendar, 
-  Users, 
-  Palette, 
-  Sparkles, 
-  Upload, 
-  Star,
-  MapPin,
-  Heart,
-  BookOpen,
-  Gift
-} from "lucide-react";
+import { toast } from "sonner";
+import { LogOut, Calendar } from "lucide-react";
 
-interface ArtistProfile {
-  language: string;
-  artForm: string;
-  name: string;
+type AppState = 'home' | 'customer-auth' | 'seller-auth' | 'seller-registration' | 'customer-marketplace' | 'product-detail';
+
+interface Product {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  images: string[];
+  is_featured: boolean;
+  is_festival_special: boolean;
+  profiles: {
+    name: string;
+    region: string;
+    phone: string;
+  };
+  artforms: {
+    name: string;
+    description: string;
+    region: string;
+    cultural_significance: string;
+    history: string;
+    heritage_story: string;
+  };
 }
 
-type ActiveTab = "dashboard" | "timeline" | "festival" | "collaboration" | "upload";
-
 export function MegaMosaicDashboard() {
-  const [isOnboarded, setIsOnboarded] = useState(false);
-  const [artistProfile, setArtistProfile] = useState<ArtistProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
+  const [appState, setAppState] = useState<AppState>('home');
+  const [user, setUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isFestivalMode, setIsFestivalMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleOnboardingComplete = (profile: ArtistProfile) => {
-    setArtistProfile(profile);
-    setIsOnboarded(true);
-  };
-
-  const getGreeting = () => {
-    if (!artistProfile) return "Welcome";
-    const artForm = artistProfile.artForm.charAt(0).toUpperCase() + artistProfile.artForm.slice(1);
-    return `Welcome ${artistProfile.name}`;
-  };
-
-  const getArtFormEmoji = (artForm: string) => {
-    const emojiMap: Record<string, string> = {
-      warli: "🎨",
-      baul: "🎵", 
-      bidriware: "⚱️",
-      pattachitra: "🖼️",
-      kalamkari: "🌸",
-      madhubani: "🦚"
+  useEffect(() => {
+    // Check for existing session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        await fetchUserProfile(session.user.id);
+      }
+      setLoading(false);
     };
-    return emojiMap[artForm] || "🎨";
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        await fetchUserProfile(session.user.id);
+      } else {
+        setUserProfile(null);
+        setAppState('home');
+      }
+    });
+
+    checkSession();
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) throw error;
+      
+      setUserProfile(data);
+      
+      // Navigate based on user role and profile completeness
+      if (data.role === 'seller' && (!data.name || !data.region)) {
+        setAppState('seller-registration');
+      } else if (data.role === 'customer') {
+        setAppState('customer-marketplace');
+      } else if (data.role === 'seller') {
+        setAppState('customer-marketplace'); // Sellers can also browse
+      }
+    } catch (error: any) {
+      console.error('Error fetching profile:', error);
+    }
   };
 
-  if (!isOnboarded) {
-    return <WelcomeScreen onComplete={handleOnboardingComplete} />;
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success("Logged out successfully");
+    } catch (error: any) {
+      toast.error("Error logging out");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-heritage flex items-center justify-center">
+        <div className="text-center">
+          <span className="text-6xl animate-heritage-glow">🎨</span>
+          <h1 className="text-2xl font-cultural text-primary mt-4">Loading MegaMosaic...</h1>
+        </div>
+      </div>
+    );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-heritage">
-      {/* Navigation Header */}
-      <header className="bg-card shadow-heritage border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-8 h-8 text-primary animate-heritage-glow" />
-                <h1 className="text-2xl font-cultural text-primary">MegaMosaic</h1>
+  // Show appropriate screen based on state
+  if (appState === 'home') {
+    return (
+      <HomeScreen
+        onCustomerLogin={() => setAppState('customer-auth')}
+        onSellerLogin={() => setAppState('seller-auth')}
+      />
+    );
+  }
+
+  if (appState === 'customer-auth') {
+    return (
+      <AuthScreen
+        userType="customer"
+        onSuccess={() => {}} // Will be handled by auth state change
+        onBack={() => setAppState('home')}
+      />
+    );
+  }
+
+  if (appState === 'seller-auth') {
+    return (
+      <AuthScreen
+        userType="seller"
+        onSuccess={() => {}} // Will be handled by auth state change
+        onBack={() => setAppState('home')}
+      />
+    );
+  }
+
+  if (appState === 'seller-registration') {
+    return (
+      <SellerRegistration
+        onComplete={() => {
+          toast.success("Welcome to MegaMosaic!");
+          setAppState('customer-marketplace');
+        }}
+      />
+    );
+  }
+
+  if (appState === 'product-detail' && selectedProduct) {
+    return (
+      <ProductDetail
+        product={selectedProduct}
+        onBack={() => {
+          setAppState('customer-marketplace');
+          setSelectedProduct(null);
+        }}
+      />
+    );
+  }
+
+  if (appState === 'customer-marketplace') {
+    return (
+      <div>
+        {/* Top Navigation */}
+        {user && (
+          <div className="bg-card shadow-sm border-b border-border sticky top-0 z-50">
+            <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <span className="text-2xl">🎨</span>
+                <span className="font-cultural text-primary">MegaMosaic</span>
+                {userProfile && (
+                  <span className="text-sm text-muted-foreground">
+                    Welcome, {userProfile.name}
+                  </span>
+                )}
               </div>
-              {artistProfile && (
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{getArtFormEmoji(artistProfile.artForm)}</span>
-                  <div>
-                    <p className="font-semibold text-foreground">{getGreeting()}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {artistProfile.artForm.charAt(0).toUpperCase() + artistProfile.artForm.slice(1)} Artist
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="animate-heritage-glow">
-                <Star className="w-3 h-3 mr-1" />
-                Level 1 Artisan
-              </Badge>
-              {isFestivalMode && (
-                <Badge variant="outline" className="animate-festival-pulse">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  Festival Mode
-                </Badge>
-              )}
+              
+              <div className="flex items-center gap-2">
+                <CulturalButton
+                  variant={isFestivalMode ? "festival" : "cultural"}
+                  size="sm"
+                  onClick={() => setIsFestivalMode(!isFestivalMode)}
+                  className="gap-2"
+                >
+                  <Calendar className="w-3 h-3" />
+                  {isFestivalMode ? "Exit Festival Mode" : "Festival Mode"}
+                </CulturalButton>
+                
+                <CulturalButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="gap-2"
+                >
+                  <LogOut className="w-3 h-3" />
+                  Logout
+                </CulturalButton>
+              </div>
             </div>
           </div>
-
-          {/* Navigation Tabs */}
-          <nav className="flex gap-2 overflow-x-auto">
-            <CulturalButton
-              variant={activeTab === "dashboard" ? "heritage" : "cultural"}
-              size="sm"
-              onClick={() => setActiveTab("dashboard")}
-            >
-              <Home className="w-4 h-4" />
-              Dashboard
-            </CulturalButton>
-            <CulturalButton
-              variant={activeTab === "timeline" ? "heritage" : "cultural"}
-              size="sm" 
-              onClick={() => setActiveTab("timeline")}
-            >
-              <BookOpen className="w-4 h-4" />
-              Cultural Timeline
-            </CulturalButton>
-            <CulturalButton
-              variant={activeTab === "festival" ? "heritage" : "cultural"}
-              size="sm"
-              onClick={() => setActiveTab("festival")}
-            >
-              <Gift className="w-4 h-4" />
-              Festival Mode
-            </CulturalButton>
-            <CulturalButton
-              variant={activeTab === "collaboration" ? "heritage" : "cultural"}
-              size="sm"
-              onClick={() => setActiveTab("collaboration")}
-            >
-              <Users className="w-4 h-4" />
-              Collaborate
-            </CulturalButton>
-            <CulturalButton
-              variant={activeTab === "upload" ? "heritage" : "cultural"}
-              size="sm"
-              onClick={() => setActiveTab("upload")}
-            >
-              <Upload className="w-4 h-4" />
-              Upload Art
-            </CulturalButton>
-          </nav>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        {activeTab === "dashboard" && (
-          <div className="animate-cultural-fade space-y-8">
-            {/* Welcome Message */}
-            <CulturalCard variant="heritage">
-              <CulturalCardHeader>
-                <CulturalCardTitle className="flex items-center gap-3">
-                  <Heart className="w-6 h-6 text-primary animate-heritage-glow" />
-                  Welcome to Your Artisan Dashboard
-                  <span className="text-2xl">{getArtFormEmoji(artistProfile!.artForm)}</span>
-                </CulturalCardTitle>
-                <CulturalCardDescription>
-                  Your digital space to showcase, collaborate, and celebrate traditional Indian arts. 
-                  Start your journey by exploring the cultural timeline or uploading your first creation.
-                </CulturalCardDescription>
-              </CulturalCardHeader>
-            </CulturalCard>
-
-            {/* Quick Actions */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <CulturalCard variant="artisan" className="text-center hover:shadow-cultural transition-all cursor-pointer"
-                onClick={() => setActiveTab("upload")}>
-                <CulturalCardContent className="p-6">
-                  <Upload className="w-12 h-12 text-primary mx-auto mb-4 animate-float" />
-                  <h3 className="font-semibold mb-2">Upload Your Art</h3>
-                  <p className="text-sm text-muted-foreground">Share your latest creations with the community</p>
-                </CulturalCardContent>
-              </CulturalCard>
-
-              <CulturalCard variant="artisan" className="text-center hover:shadow-cultural transition-all cursor-pointer"
-                onClick={() => setActiveTab("timeline")}>
-                <CulturalCardContent className="p-6">
-                  <BookOpen className="w-12 h-12 text-primary mx-auto mb-4 animate-float" />
-                  <h3 className="font-semibold mb-2">Explore Timeline</h3>
-                  <p className="text-sm text-muted-foreground">Journey through 5000 years of Indian art history</p>
-                </CulturalCardContent>
-              </CulturalCard>
-
-              <CulturalCard variant="artisan" className="text-center hover:shadow-cultural transition-all cursor-pointer"
-                onClick={() => setActiveTab("collaboration")}>
-                <CulturalCardContent className="p-6">
-                  <Users className="w-12 h-12 text-primary mx-auto mb-4 animate-float" />
-                  <h3 className="font-semibold mb-2">Find Collaborators</h3>
-                  <p className="text-sm text-muted-foreground">Connect with artisans for fusion projects</p>
-                </CulturalCardContent>
-              </CulturalCard>
-
-              <CulturalCard variant="artisan" className="text-center hover:shadow-cultural transition-all cursor-pointer"
-                onClick={() => setActiveTab("festival")}>
-                <CulturalCardContent className="p-6">
-                  <Sparkles className="w-12 h-12 text-primary mx-auto mb-4 animate-float" />
-                  <h3 className="font-semibold mb-2">Festival Collections</h3>
-                  <p className="text-sm text-muted-foreground">Discover themed products for celebrations</p>
-                </CulturalCardContent>
-              </CulturalCard>
-            </div>
-
-            {/* Recent Activity */}
-            <CulturalCard variant="timeline">
-              <CulturalCardHeader>
-                <CulturalCardTitle>Recent Community Activity</CulturalCardTitle>
-              </CulturalCardHeader>
-              <CulturalCardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-3 bg-heritage rounded-lg">
-                    <span className="text-2xl">🎨</span>
-                    <div className="flex-1">
-                      <p className="text-sm"><strong>Priya Sharma</strong> uploaded a new Warli painting</p>
-                      <p className="text-xs text-muted-foreground">2 hours ago • Maharashtra</p>
-                    </div>
-                    <Heart className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="flex items-center gap-4 p-3 bg-heritage rounded-lg">
-                    <span className="text-2xl">⚱️</span>
-                    <div className="flex-1">
-                      <p className="text-sm"><strong>Rajesh Kumar</strong> started a collaboration project</p>
-                      <p className="text-xs text-muted-foreground">1 day ago • Karnataka</p>
-                    </div>
-                    <Users className="w-4 h-4 text-primary" />
-                  </div>
-                </div>
-              </CulturalCardContent>
-            </CulturalCard>
-          </div>
-        )}
-
-        {activeTab === "timeline" && <CulturalTimeline />}
-        
-        {activeTab === "festival" && (
-          <FestivalMode isActive={isFestivalMode} onToggle={setIsFestivalMode} />
         )}
         
-        {activeTab === "collaboration" && <CollaborationHub />}
-        
-        {activeTab === "upload" && (
-          <div className="animate-cultural-fade">
-            <CulturalCard variant="heritage">
-              <CulturalCardHeader className="text-center">
-                <CulturalCardTitle className="flex items-center justify-center gap-2">
-                  <Upload className="w-6 h-6 text-primary" />
-                  Upload Your Artwork
-                </CulturalCardTitle>
-                <CulturalCardDescription>
-                  Share your traditional art with the world. Our AI will help categorize and add cultural context.
-                </CulturalCardDescription>
-              </CulturalCardHeader>
-              <CulturalCardContent>
-                <div className="border-2 border-dashed border-border rounded-lg p-12 text-center">
-                  <Palette className="w-16 h-16 text-primary mx-auto mb-4 animate-float" />
-                  <h3 className="text-lg font-semibold mb-2">Drag & Drop Your Art</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Upload photos, videos, or audio of your work. AI will automatically add descriptions and cultural context.
-                  </p>
-                  <CulturalButton variant="festival" size="lg">
-                    <Upload className="w-5 h-5" />
-                    Choose Files
-                  </CulturalButton>
-                </div>
-              </CulturalCardContent>
-            </CulturalCard>
-          </div>
-        )}
-      </main>
-    </div>
+        <CustomerMarketplace
+          isFestivalMode={isFestivalMode}
+          onProductSelect={(product) => {
+            setSelectedProduct(product);
+            setAppState('product-detail');
+          }}
+        />
+      </div>
+    );
+  }
+
+  // Fallback
+  return (
+    <HomeScreen
+      onCustomerLogin={() => setAppState('customer-auth')}
+      onSellerLogin={() => setAppState('seller-auth')}
+    />
   );
 }
